@@ -311,13 +311,28 @@ $$('.project').forEach(card => {
 });
 addEventListener('resize', () => runners.forEach(r => r.card.classList.contains('open') && r.run.resize()));
 
-(function network() {
+(function vision() {
   const cv = $('#net');
   const hero = $('.hero');
   const ctx = cv.getContext('2d');
-  let w = 0, h = 0, nodes = [], pulses = [], raf = 0, last = 0, nextP = 0, visible = true;
-  const mouse = { x: -999, y: -999 };
-  const LINK = 130;
+  let w = 0, h = 0, objs = [], raf = 0, last = 0, clock = 0, nextId = 1, visible = true;
+
+  function make(kind, fresh) {
+    const car = kind === 'car';
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    return {
+      id: nextId++,
+      kind,
+      born: clock,
+      x: car ? (fresh ? rand(0, w) : dir > 0 ? -60 : w + 60) : rand(40, w - 40),
+      y: car ? rand(h * 0.6, h * 0.9) : rand(h * 0.2, h * 0.85),
+      vx: car ? dir * rand(60, 95) : rand(-22, 22),
+      vy: car ? 0 : rand(-12, 12),
+      ph: rand(0, 6.28),
+      acc: 0,
+      trail: []
+    };
+  }
 
   function size() {
     const r = hero.getBoundingClientRect();
@@ -327,63 +342,110 @@ addEventListener('resize', () => runners.forEach(r => r.card.classList.contains(
     cv.width = Math.round(w * dpr);
     cv.height = Math.round(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const n = clamp(Math.round((w * h) / 15000), 24, 70);
-    nodes = Array.from({ length: n }, () => ({ x: rand(0, w), y: rand(0, h), vx: rand(-0.18, 0.18), vy: rand(-0.18, 0.18) }));
-    pulses = [];
+    const small = w < 600;
+    objs = [];
+    for (let i = 0; i < (small ? 3 : 5); i++) objs.push(make('person', true));
+    for (let i = 0; i < (small ? 1 : 2); i++) objs.push(make('car', true));
   }
 
-  function draw(now, move) {
-    const dt = last ? Math.min((now - last) / 1000, 0.05) : 0;
-    last = now;
+  function step(dt) {
+    clock += dt;
+    objs = objs.map(o => {
+      o.x += o.vx * dt;
+      o.y += o.vy * dt;
+      if (o.kind === 'car') {
+        if (o.x < -80 || o.x > w + 80) return make('car', false);
+      } else {
+        o.vx = clamp(o.vx + rand(-1, 1) * dt * 30, -28, 28);
+        o.vy = clamp(o.vy + rand(-1, 1) * dt * 20, -14, 14);
+        if (o.x < 30 || o.x > w - 30) { o.vx *= -1; o.x = clamp(o.x, 30, w - 30); }
+        if (o.y < h * 0.15 || o.y > h * 0.9) { o.vy *= -1; o.y = clamp(o.y, h * 0.15, h * 0.9); }
+      }
+      o.acc += dt;
+      if (o.acc > 0.08) { o.acc = 0; o.trail.push({ x: o.x, y: o.y }); if (o.trail.length > 18) o.trail.shift(); }
+      return o;
+    });
+  }
+
+  function corners(x, y, hw, hh, len, alpha) {
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = C.brown;
+    ctx.lineWidth = 1.5;
+    [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) => {
+      ctx.beginPath();
+      ctx.moveTo(x + sx * hw, y + sy * (hh - len));
+      ctx.lineTo(x + sx * hw, y + sy * hh);
+      ctx.lineTo(x + sx * (hw - len), y + sy * hh);
+      ctx.stroke();
+    });
+    ctx.globalAlpha = alpha * 0.18;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x - hw, y - hh, hw * 2, hh * 2);
+    ctx.globalAlpha = 1;
+  }
+
+  function render() {
     ctx.clearRect(0, 0, w, h);
-    if (move) {
-      nodes.forEach(n => {
-        n.x += n.vx * 60 * dt;
-        n.y += n.vy * 60 * dt;
-        if (n.x < 0 || n.x > w) n.vx *= -1;
-        if (n.y < 0 || n.y > h) n.vy *= -1;
-      });
+    const sy = (clock * 70) % (h + 140) - 70;
+    for (let k = 0; k < 8; k++) {
+      ctx.fillStyle = `rgba(143,104,71,${0.05 * (1 - k / 8)})`;
+      ctx.fillRect(0, sy - k * 5, w, 5);
     }
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const d = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
-        if (d < LINK) segment(ctx, nodes[i].x, nodes[i].y, nodes[j].x, nodes[j].y, `rgba(143,104,71,${(1 - d / LINK) * 0.22})`);
+    segment(ctx, 0, sy, w, sy, 'rgba(143,104,71,0.28)', 1);
+
+    objs.forEach(o => {
+      o.trail.forEach((p, i) => dot(ctx, p.x, p.y, 1.6, C.brown, (i / o.trail.length) * 0.35));
+      const a = clamp((clock - o.born) / 0.6, 0, 1);
+      const car = o.kind === 'car';
+      ctx.globalAlpha = 0.6;
+      if (car) {
+        box(ctx, o.x - 27, o.y - 9, 54, 18, 6, C.soft, 'rgba(0,0,0,0)');
+        dot(ctx, o.x - 15, o.y + 10, 5, C.brown);
+        dot(ctx, o.x + 15, o.y + 10, 5, C.brown);
+      } else {
+        dot(ctx, o.x, o.y - 14, 6, C.soft);
+        box(ctx, o.x - 9, o.y - 6, 18, 26, 7, C.soft, 'rgba(0,0,0,0)');
       }
-      const m = Math.hypot(nodes[i].x - mouse.x, nodes[i].y - mouse.y);
-      if (m < 170) segment(ctx, nodes[i].x, nodes[i].y, mouse.x, mouse.y, `rgba(143,104,71,${(1 - m / 170) * 0.4})`);
-      dot(ctx, nodes[i].x, nodes[i].y, 2, C.brown, 0.45);
-    }
-    if (move) {
-      if (now > nextP && nodes.length) {
-        const a = Math.floor(Math.random() * nodes.length);
-        const near = nodes.map((b, j) => ({ j, d: Math.hypot(nodes[a].x - b.x, nodes[a].y - b.y) })).filter(o => o.j !== a && o.d < LINK);
-        if (near.length) pulses.push({ a, b: near[Math.floor(Math.random() * near.length)].j, u: 0 });
-        nextP = now + 220;
-      }
-      pulses.forEach(k => { k.u += dt * 1.1; });
-      pulses = pulses.filter(k => k.u < 1);
-    }
-    pulses.forEach(k => dot(ctx, lerp(nodes[k.a].x, nodes[k.b].x, k.u), lerp(nodes[k.a].y, nodes[k.b].y, k.u), 3, C.brown, 0.85));
+      ctx.globalAlpha = 1;
+      const hw = car ? 38 : 17, hh = car ? 20 : 29;
+      const cy = car ? o.y + 1 : o.y;
+      const grow = 1 + (1 - a) * 0.5;
+      corners(o.x, cy, hw * grow, hh * grow, 7, a);
+      const conf = (0.9 + 0.08 * Math.sin(clock * 0.9 + o.ph)).toFixed(2);
+      const tag = (car ? 'car ' : 'person ') + conf + '  #' + o.id;
+      const tw = tag.length * 5.7 + 12;
+      ctx.globalAlpha = a;
+      box(ctx, o.x - hw, cy - hh - 17, tw, 15, 4, C.brown, C.brown);
+      text(ctx, tag, o.x - hw + 6, cy - hh - 9.5, '#fff', 10, 500, 'left');
+      ctx.globalAlpha = 1;
+    });
+
+    const on = Math.floor(clock * 1.2) % 2 === 0;
+    if (on) dot(ctx, w - 118, 30, 4, C.warn);
+    ctx.font = '500 11px "JetBrains Mono", ui-monospace, monospace';
+    ctx.fillStyle = C.muted;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('CAM 01  LIVE', w - 108, 30);
+    ctx.fillText(objs.length + ' objects tracked', w - 138, 50);
   }
 
   function loop(now) {
-    draw(now, true);
+    const dt = last ? Math.min((now - last) / 1000, 0.05) : 0;
+    last = now;
+    step(dt);
+    render();
     raf = requestAnimationFrame(loop);
   }
   function play() { if (!reduce && visible && !document.hidden) { cancelAnimationFrame(raf); last = 0; raf = requestAnimationFrame(loop); } }
   function pause() { cancelAnimationFrame(raf); }
+  function still() { clock = 3; objs.forEach(o => { o.born = 0; }); render(); }
 
   size();
-  if (reduce) { draw(0, false); } else { play(); }
-  addEventListener('resize', () => { size(); if (reduce) draw(0, false); });
+  if (reduce) still(); else play();
+  addEventListener('resize', () => { size(); if (reduce) still(); });
   document.addEventListener('visibilitychange', () => (document.hidden ? pause() : play()));
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) play(); else pause(); }).observe(hero);
-  hero.addEventListener('pointermove', e => {
-    const r = cv.getBoundingClientRect();
-    mouse.x = e.clientX - r.left;
-    mouse.y = e.clientY - r.top;
-  });
-  hero.addEventListener('pointerleave', () => { mouse.x = -999; mouse.y = -999; });
 })();
 
 (function typing() {
@@ -433,31 +495,7 @@ addEventListener('resize', () => runners.forEach(r => r.card.classList.contains(
   }, 500);
 })();
 
-function countUp(el) {
-  const end = parseFloat(el.dataset.count);
-  const dec = parseInt(el.dataset.dec || '0', 10);
-  const suffix = el.dataset.suffix || '';
-  if (reduce) { el.textContent = end.toFixed(dec) + suffix; return; }
-  const start = performance.now();
-  (function f(now) {
-    const u = Math.min(1, (now - start) / 1400);
-    const e = 1 - Math.pow(1 - u, 3);
-    el.textContent = (end * e).toFixed(dec) + suffix;
-    if (u < 1) requestAnimationFrame(f);
-  })(start);
-}
-
-const countObserver = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (!e.isIntersecting) return;
-    countObserver.unobserve(e.target);
-    countUp(e.target);
-  });
-}, { threshold: 0.6 });
-$$('[data-count]').forEach(el => countObserver.observe(el));
-
 $$('.tiles .tile').forEach((el, i) => el.style.setProperty('--d', i * 60 + 'ms'));
-$$('.stats li').forEach((el, i) => el.style.setProperty('--d', i * 80 + 'ms'));
 $$('.project-grid .project').forEach((el, i) => el.style.setProperty('--d', i * 90 + 'ms'));
 
 const revealObserver = new IntersectionObserver(entries => {
