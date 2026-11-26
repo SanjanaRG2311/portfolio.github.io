@@ -88,11 +88,6 @@ button { font: inherit; }
 .section-title::after { content: ""; display: block; width: 44px; height: 3px; margin-top: 0.75rem; background: var(--soft); border-radius: 3px; }
 
 .about-text { font-size: 1.2rem; max-width: 46ch; }
-.stats { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 2.5rem; border-top: 1px solid var(--line); }
-.stats li { padding: 1.5rem 1.25rem 0 0; }
-.stats li + li { padding-left: 1.5rem; border-left: 1px solid var(--line); }
-.stats strong { display: block; font-family: var(--display); font-size: clamp(2rem, 4.5vw, 2.9rem); font-weight: 600; color: var(--brown); line-height: 1.1; }
-.stats span { display: block; color: var(--muted); font-size: 0.92rem; margin-top: 0.35rem; }
 
 .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
 .tile {
@@ -188,9 +183,6 @@ button { font: inherit; }
 @media (max-width: 900px) {
   .hero-grid { grid-template-columns: 1fr; }
   .tiles { grid-template-columns: repeat(2, 1fr); }
-  .stats { grid-template-columns: repeat(2, 1fr); }
-  .stats li:nth-child(3) { padding-left: 0; border-left: 0; }
-  .stats li:nth-child(n+3) { border-top: 1px solid var(--line); margin-top: 1.25rem; }
   .project-grid { grid-template-columns: 1fr; }
   .nav-toggle { display: inline-block; }
   .nav-menu {
