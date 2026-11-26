@@ -311,123 +311,139 @@ $$('.project').forEach(card => {
 });
 addEventListener('resize', () => runners.forEach(r => r.card.classList.contains('open') && r.run.resize()));
 
-(function vision() {
+(function flow() {
   const cv = $('#net');
-  const hero = $('.hero');
   const ctx = cv.getContext('2d');
-  let w = 0, h = 0, objs = [], raf = 0, last = 0, clock = 0, nextId = 1, visible = true;
-
-  function make(kind, fresh) {
-    const car = kind === 'car';
-    const dir = Math.random() < 0.5 ? 1 : -1;
-    return {
-      id: nextId++,
-      kind,
-      born: clock,
-      x: car ? (fresh ? rand(0, w) : dir > 0 ? -60 : w + 60) : rand(40, w - 40),
-      y: car ? rand(h * 0.6, h * 0.9) : rand(h * 0.2, h * 0.85),
-      vx: car ? dir * rand(60, 95) : rand(-22, 22),
-      vy: car ? 0 : rand(-12, 12),
-      ph: rand(0, 6.28),
-      acc: 0,
-      trail: []
-    };
-  }
+  const labels = [['Ingest', 'Kafka'], ['Process', 'SQL and ETL'], ['Model', 'ML and GenAI'], ['Insight', 'Dashboards']];
+  const flash = [0, 0, 0, 0];
+  const bars = [0.4, 0.65, 0.5, 0.8, 0.6];
+  let targets = bars.slice();
+  let w = 0, h = 0, raf = 0, last = 0, clock = 0, next = 0, nextBars = 0, packets = [], visible = true;
 
   function size() {
-    const r = hero.getBoundingClientRect();
+    const r = cv.getBoundingClientRect();
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     w = r.width;
     h = r.height;
     cv.width = Math.round(w * dpr);
     cv.height = Math.round(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const small = w < 600;
-    objs = [];
-    for (let i = 0; i < (small ? 3 : 5); i++) objs.push(make('person', true));
-    for (let i = 0; i < (small ? 1 : 2); i++) objs.push(make('car', true));
+  }
+
+  function geometry() {
+    return { cw: Math.min(132, w * 0.2), ch: Math.min(88, h - 62), top: 4, xs: [0.125, 0.375, 0.625, 0.875].map(v => v * w) };
+  }
+
+  const visuals = [
+    (x0, y0, cw, ch) => {
+      const p = 14, span = cw - 2 * p;
+      [0.3, 0.5, 0.7].forEach((f, lane) => {
+        const y = y0 + ch * f;
+        segment(ctx, x0 + p, y, x0 + p + span, y, '#F0E8DE', 3);
+        for (let k = 0; k < 3; k++) {
+          const dx = (clock * (34 + lane * 8) + (k * span) / 3 + lane * 11) % span;
+          const len = Math.min(10, span - dx);
+          ctx.globalAlpha = 0.85;
+          segment(ctx, x0 + p + dx, y, x0 + p + dx + len, y, C.soft, 3);
+          ctx.globalAlpha = 1;
+        }
+      });
+    },
+    (x0, y0, cw, ch) => {
+      const p = 14, gap = 4;
+      const cwid = (cw - 2 * p - 2 * gap) / 3, chei = (ch - 2 * p - 2 * gap) / 3;
+      const act = Math.floor(clock * 2.2) % 3;
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          const fill = r === act ? C.brown : r === (act + 2) % 3 ? C.soft : '#F0E8DE';
+          box(ctx, x0 + p + c * (cwid + gap), y0 + p + r * (chei + gap), cwid, chei, 3, fill, 'rgba(0,0,0,0)');
+        }
+      }
+    },
+    (x0, y0, cw, ch) => {
+      const layers = [3, 4, 2], p = 16;
+      const pts = layers.map((n, l) => Array.from({ length: n }, (_, i) => ({ x: x0 + p + (l * (cw - 2 * p)) / 2, y: y0 + (ch * (i + 1)) / (n + 1) })));
+      for (let l = 0; l < 2; l++) {
+        pts[l].forEach((a, i) => pts[l + 1].forEach((b, j) => {
+          const act = 0.5 + 0.5 * Math.sin(clock * 3 + l * 1.3 + i + j);
+          segment(ctx, a.x, a.y, b.x, b.y, `rgba(143,104,71,${0.08 + 0.22 * act})`, 1);
+        }));
+      }
+      pts.forEach((layer, l) => layer.forEach((n, i) => {
+        const act = 0.5 + 0.5 * Math.sin(clock * 3 + l * 1.3 + i * 1.7);
+        dot(ctx, n.x, n.y, 3.6, C.brown, 0.3 + 0.7 * act);
+      }));
+    },
+    (x0, y0, cw, ch) => {
+      const p = 14, base = y0 + ch - p, maxH = ch - 2 * p - 8, slot = (cw - 2 * p) / 5, bw = slot * 0.6;
+      const tops = bars.map((b, i) => ({ x: x0 + p + i * slot + slot / 2, y: base - b * maxH }));
+      tops.forEach((t, i) => box(ctx, t.x - bw / 2, t.y, bw, base - t.y, 2, i === 4 ? C.brown : C.soft, 'rgba(0,0,0,0)'));
+      ctx.beginPath();
+      tops.forEach((t, i) => { if (i) ctx.lineTo(t.x, t.y - 7); else ctx.moveTo(t.x, t.y - 7); });
+      ctx.globalAlpha = 0.7;
+      ctx.strokeStyle = C.ink;
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      const end = tops[tops.length - 1];
+      dot(ctx, end.x, end.y - 7, 2.6, C.ink);
+    }
+  ];
+
+  function packet(x, y, seg, a) {
+    ctx.globalAlpha = a;
+    if (seg === 0) box(ctx, x - 4, y - 4, 8, 8, 2, C.soft, C.soft);
+    else if (seg === 1) box(ctx, x - 4, y - 4, 8, 8, 2, C.brown, C.brown);
+    else {
+      dot(ctx, x, y, 4.5, C.brown);
+      ctx.beginPath();
+      ctx.arc(x, y, 8, 0, Math.PI * 2);
+      ctx.strokeStyle = C.brown;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
   }
 
   function step(dt) {
     clock += dt;
-    objs = objs.map(o => {
-      o.x += o.vx * dt;
-      o.y += o.vy * dt;
-      if (o.kind === 'car') {
-        if (o.x < -80 || o.x > w + 80) return make('car', false);
-      } else {
-        o.vx = clamp(o.vx + rand(-1, 1) * dt * 30, -28, 28);
-        o.vy = clamp(o.vy + rand(-1, 1) * dt * 20, -14, 14);
-        if (o.x < 30 || o.x > w - 30) { o.vx *= -1; o.x = clamp(o.x, 30, w - 30); }
-        if (o.y < h * 0.15 || o.y > h * 0.9) { o.vy *= -1; o.y = clamp(o.y, h * 0.15, h * 0.9); }
-      }
-      o.acc += dt;
-      if (o.acc > 0.08) { o.acc = 0; o.trail.push({ x: o.x, y: o.y }); if (o.trail.length > 18) o.trail.shift(); }
-      return o;
+    for (let i = 0; i < 4; i++) flash[i] = Math.max(0, flash[i] - dt * 2.2);
+    if (clock > next) { packets.push({ u: 0 }); flash[0] = 1; next = clock + 0.95; }
+    packets.forEach(k => {
+      const before = Math.floor(k.u);
+      k.u += dt * 0.6;
+      const after = Math.floor(k.u);
+      if (after > before && after <= 3) flash[after] = 1;
     });
-  }
-
-  function corners(x, y, hw, hh, len, alpha) {
-    ctx.globalAlpha = alpha;
-    ctx.strokeStyle = C.brown;
-    ctx.lineWidth = 1.5;
-    [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) => {
-      ctx.beginPath();
-      ctx.moveTo(x + sx * hw, y + sy * (hh - len));
-      ctx.lineTo(x + sx * hw, y + sy * hh);
-      ctx.lineTo(x + sx * (hw - len), y + sy * hh);
-      ctx.stroke();
-    });
-    ctx.globalAlpha = alpha * 0.18;
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x - hw, y - hh, hw * 2, hh * 2);
-    ctx.globalAlpha = 1;
+    packets = packets.filter(k => k.u < 3);
+    if (clock > nextBars) { targets = bars.map(() => rand(0.3, 0.95)); nextBars = clock + 1.8; }
+    bars.forEach((b, i) => { bars[i] = b + (targets[i] - b) * Math.min(1, dt * 3); });
   }
 
   function render() {
     ctx.clearRect(0, 0, w, h);
-    const sy = (clock * 70) % (h + 140) - 70;
-    for (let k = 0; k < 8; k++) {
-      ctx.fillStyle = `rgba(143,104,71,${0.05 * (1 - k / 8)})`;
-      ctx.fillRect(0, sy - k * 5, w, 5);
-    }
-    segment(ctx, 0, sy, w, sy, 'rgba(143,104,71,0.28)', 1);
-
-    objs.forEach(o => {
-      o.trail.forEach((p, i) => dot(ctx, p.x, p.y, 1.6, C.brown, (i / o.trail.length) * 0.35));
-      const a = clamp((clock - o.born) / 0.6, 0, 1);
-      const car = o.kind === 'car';
-      ctx.globalAlpha = 0.6;
-      if (car) {
-        box(ctx, o.x - 27, o.y - 9, 54, 18, 6, C.soft, 'rgba(0,0,0,0)');
-        dot(ctx, o.x - 15, o.y + 10, 5, C.brown);
-        dot(ctx, o.x + 15, o.y + 10, 5, C.brown);
-      } else {
-        dot(ctx, o.x, o.y - 14, 6, C.soft);
-        box(ctx, o.x - 9, o.y - 6, 18, 26, 7, C.soft, 'rgba(0,0,0,0)');
-      }
+    const { cw, ch, top, xs } = geometry();
+    const cy = top + ch / 2;
+    for (let i = 0; i < 3; i++) segment(ctx, xs[i] + cw / 2, cy, xs[i + 1] - cw / 2, cy, C.line, 1.5, [4, 5]);
+    xs.forEach((x, i) => {
+      const x0 = x - cw / 2;
+      box(ctx, x0, top, cw, ch, 12, '#fff', C.line);
+      ctx.globalAlpha = flash[i];
+      box(ctx, x0, top, cw, ch, 12, 'rgba(0,0,0,0)', C.brown);
       ctx.globalAlpha = 1;
-      const hw = car ? 38 : 17, hh = car ? 20 : 29;
-      const cy = car ? o.y + 1 : o.y;
-      const grow = 1 + (1 - a) * 0.5;
-      corners(o.x, cy, hw * grow, hh * grow, 7, a);
-      const conf = (0.9 + 0.08 * Math.sin(clock * 0.9 + o.ph)).toFixed(2);
-      const tag = (car ? 'car ' : 'person ') + conf + '  #' + o.id;
-      const tw = tag.length * 5.7 + 12;
-      ctx.globalAlpha = a;
-      box(ctx, o.x - hw, cy - hh - 17, tw, 15, 4, C.brown, C.brown);
-      text(ctx, tag, o.x - hw + 6, cy - hh - 9.5, '#fff', 10, 500, 'left');
-      ctx.globalAlpha = 1;
+      visuals[i](x0, top, cw, ch);
+      text(ctx, labels[i][0], x, top + ch + 18, C.ink, 13, 600);
+      text(ctx, labels[i][1], x, top + ch + 35, C.muted, 11);
     });
-
-    const on = Math.floor(clock * 1.2) % 2 === 0;
-    if (on) dot(ctx, w - 118, 30, 4, C.warn);
-    ctx.font = '500 11px "JetBrains Mono", ui-monospace, monospace';
-    ctx.fillStyle = C.muted;
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('CAM 01  LIVE', w - 108, 30);
-    ctx.fillText(objs.length + ' objects tracked', w - 138, 50);
+    packets.forEach(k => {
+      const seg = Math.min(2, Math.floor(k.u));
+      const from = xs[seg] + cw / 2, to = xs[seg + 1] - cw / 2;
+      const x = lerp(from, to, k.u - seg);
+      for (let t = 1; t <= 3; t++) {
+        if (x - t * 9 > from) dot(ctx, x - t * 9, cy, 2.2, C.brown, 0.28 - t * 0.07);
+      }
+      packet(x, cy, seg, 1);
+    });
   }
 
   function loop(now) {
@@ -439,13 +455,13 @@ addEventListener('resize', () => runners.forEach(r => r.card.classList.contains(
   }
   function play() { if (!reduce && visible && !document.hidden) { cancelAnimationFrame(raf); last = 0; raf = requestAnimationFrame(loop); } }
   function pause() { cancelAnimationFrame(raf); }
-  function still() { clock = 3; objs.forEach(o => { o.born = 0; }); render(); }
+  function still() { clock = 3; packets = [{ u: 0.5 }, { u: 1.4 }, { u: 2.3 }]; render(); }
 
   size();
   if (reduce) still(); else play();
   addEventListener('resize', () => { size(); if (reduce) still(); });
   document.addEventListener('visibilitychange', () => (document.hidden ? pause() : play()));
-  new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) play(); else pause(); }).observe(hero);
+  new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) play(); else pause(); }).observe(cv);
 })();
 
 (function typing() {
