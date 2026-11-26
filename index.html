@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Sanjana R.G - Data analyst and engineer building real-time data pipelines, analytics and applied AI. MSc Computing (AI), Dublin.">
-<meta name="author" content="Sanjana R.G">
-<meta name="theme-color" content="#F6EFE6">
-<title>Sanjana R.G | Data Analyst and Engineer</title>
+<meta name="description" content="Sanjana Ravi Geetha - AI Engineer building real-time data pipelines, computer vision systems and applied generative AI. Dublin, Ireland.">
+<meta name="author" content="Sanjana Ravi Geetha">
+<meta name="theme-color" content="#FFFFFF">
+<title>Sanjana Ravi Geetha | AI Engineer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="portfolio.css">
 </head>
 <body>
 
-<header class="header">
+<header class="header" id="top">
   <nav class="nav wrap" aria-label="Main">
-    <a href="#home" class="brand">Sanjana R.G</a>
+    <a href="#home" class="brand">Sanjana Ravi Geetha</a>
     <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">Menu</button>
     <div class="nav-menu">
       <a href="#about">About</a>
@@ -32,109 +32,85 @@
 
 <main>
 <section id="home" class="hero">
+  <canvas id="net" aria-hidden="true"></canvas>
   <div class="wrap hero-grid">
     <div class="hero-text">
-      <p class="hero-role">Data analyst and engineer, Dublin</p>
-      <h1>Sanjana R.G</h1>
-      <p class="hero-lede">I build the pipelines that move data and the models and dashboards that make sense of it. Most recently, a production Kafka platform running nine analytics pipelines for live clients.</p>
+      <h1>Sanjana Ravi Geetha</h1>
+      <p class="hero-role">AI Engineer</p>
+      <p class="typed-line">I build <span id="typed"></span><span class="caret-inline" aria-hidden="true"></span></p>
       <div class="hero-actions">
-        <a href="#projects" class="btn">See my work</a>
-        <a href="#contact" class="btn btn-ghost">Get in touch</a>
+        <a href="#projects" class="btn">View projects</a>
+        <a href="#contact" class="btn btn-ghost">Contact</a>
       </div>
     </div>
-    <aside class="hero-card" aria-label="At a glance">
-      <h2>Right now</h2>
-      <dl>
-        <div><dt>Studying</dt><dd>MSc Computing (AI), Dublin City University</dd></div>
-        <div><dt>Previously</dt><dd>AI/ML Engineer Intern, Mirador AI Technologies</dd></div>
-        <div><dt>Degree</dt><dd>B.Tech AI and Data Science, CGPA 8.62</dd></div>
-        <div><dt>Open to</dt><dd>Remote, hybrid or on-site in Ireland</dd></div>
-      </dl>
-    </aside>
+    <div class="terminal" aria-label="Pipeline status">
+      <div class="terminal-bar"><i></i><i></i><i></i><span>pipelines</span></div>
+      <div class="terminal-body" id="term"></div>
+    </div>
   </div>
 </section>
 
 <section id="about" class="section">
-  <div class="wrap narrow">
-    <h2 class="section-title">About</h2>
-    <p>I'm an MSc Computing (Artificial Intelligence) student in Dublin with a B.Tech in Artificial Intelligence and Data Science. My work sits across three areas: data engineering, data analysis and applied generative AI.</p>
-    <p>I've architected a real-time Apache Kafka streaming platform, built computer vision and NLP systems from ingestion through deployment, and worked directly with clients to turn business requirements into technical specifications. I like work where research ideas have to survive production.</p>
+  <div class="wrap">
+    <h2 class="section-title reveal">About</h2>
+    <p class="about-text reveal">AI engineer and MSc Computing (AI) student at Dublin City University, focused on real-time data pipelines, computer vision and applied generative AI.</p>
+    <ul class="stats">
+      <li class="reveal"><strong data-count="9">9</strong><span>Concurrent pipelines in production</span></li>
+      <li class="reveal"><strong data-count="8.62" data-dec="2">8.62</strong><span>CGPA, B.Tech</span></li>
+      <li class="reveal"><strong data-count="3" data-suffix="rd">3rd</strong><span>Place, Solana hackathon</span></li>
+      <li class="reveal"><strong data-count="2">2</strong><span>Industry internships</span></li>
+    </ul>
   </div>
 </section>
 
 <section id="skills" class="section section-alt">
   <div class="wrap">
-    <h2 class="section-title">Skills</h2>
-    <div class="menu">
-      <div class="menu-group">
-        <h3>Data engineering</h3>
-        <ul>
-          <li><span>Apache Kafka</span><i></i><span>Real-time streaming</span></li>
-          <li><span>Python</span><i></i><span>ETL, ingestion</span></li>
-          <li><span>SQL</span><i></i><span>Preprocessing</span></li>
-          <li><span>Git and GitHub</span><i></i><span>Version control</span></li>
-        </ul>
-      </div>
-      <div class="menu-group">
-        <h3>Data analysis</h3>
-        <ul>
-          <li><span>EDA</span><i></i><span>Feature engineering</span></li>
-          <li><span>Statistics</span><i></i><span>Time series</span></li>
-          <li><span>Power BI</span><i></i><span>Dashboards</span></li>
-          <li><span>MS Excel</span><i></i><span>Predictive modelling</span></li>
-        </ul>
-      </div>
-      <div class="menu-group">
-        <h3>Generative AI and ML</h3>
-        <ul>
-          <li><span>NLP</span><i></i><span>Conversational AI</span></li>
-          <li><span>FAISS</span><i></i><span>Vector search, embeddings</span></li>
-          <li><span>CNN, LSTM</span><i></i><span>Deep learning</span></li>
-          <li><span>Model evaluation</span><i></i><span>Hyperparameter tuning</span></li>
-        </ul>
-      </div>
-      <div class="menu-group">
-        <h3>Tools and alternative data</h3>
-        <ul>
-          <li><span>Scikit-learn</span><i></i><span>TensorFlow, Keras</span></li>
-          <li><span>Jupyter</span><i></i><span>Notebooks</span></li>
-          <li><span>Video analytics</span><i></i><span>Annotation, labelling</span></li>
-          <li><span>Satellite imagery</span><i></i><span>Unstructured data</span></li>
-        </ul>
-      </div>
-    </div>
+    <h2 class="section-title reveal">Skills</h2>
+    <ul class="tiles">
+      <li class="tile reveal"><b>Python</b><span>Core language</span></li>
+      <li class="tile reveal"><b>SQL</b><span>Data querying</span></li>
+      <li class="tile reveal"><b>Apache Kafka</b><span>Real-time streaming</span></li>
+      <li class="tile reveal"><b>Computer Vision</b><span>YOLO, ByteTrack, OpenCV</span></li>
+      <li class="tile reveal"><b>Deep Learning</b><span>CNN, LSTM</span></li>
+      <li class="tile reveal"><b>NLP and GenAI</b><span>LLMs, FAISS</span></li>
+      <li class="tile reveal"><b>Data Analysis</b><span>EDA, modelling</span></li>
+      <li class="tile reveal"><b>Power BI</b><span>Dashboards</span></li>
+    </ul>
   </div>
 </section>
 
 <section id="projects" class="section">
   <div class="wrap">
-    <h2 class="section-title">Projects</h2>
+    <h2 class="section-title reveal">Projects</h2>
+    <p class="hint reveal">Click a project title to see it run.</p>
 
-    <article class="project project-lead">
-      <div>
-        <h3>Kafka-based AI video analytics</h3>
-        <p>A real-time pipeline that uses Apache Kafka to process event and video streams at scale. It runs object detection, tracking, face recognition, licence-plate recognition, crowd counting and anomaly detection across multiple camera streams, in containerised services monitored with Prometheus and Grafana.</p>
-      </div>
-      <ul class="tags">
-        <li>Python</li><li>Apache Kafka</li><li>YOLOv8</li><li>ByteTrack</li><li>OpenCV</li><li>FFmpeg</li><li>Docker</li><li>MinIO</li><li>Prometheus</li><li>Grafana</li>
-      </ul>
-    </article>
+    <div class="project-grid">
+      <article class="project project-lead reveal">
+        <h3><button class="project-toggle" aria-expanded="false" aria-controls="demo-kafka"><span class="ttl">Kafka video analytics</span><span class="pill"><i></i><span class="pill-text">Live demo</span></span></button></h3>
+        <p>Real-time pipeline that streams live camera feeds through detection, tracking, face recognition and anomaly detection.</p>
+        <ul class="tags"><li>Apache Kafka</li><li>YOLOv8</li><li>ByteTrack</li><li>Docker</li><li>Grafana</li></ul>
+        <div class="demo-wrap" id="demo-kafka"><div class="demo-inner"><canvas data-demo="kafka" role="img" aria-label="Animation of camera events flowing through Kafka to analytics consumers"></canvas></div></div>
+      </article>
 
-    <div class="project-row">
-      <article class="project">
-        <h3>Insider threat prediction with behavioural graphs</h3>
-        <p>An adaptive detection framework that models organisational activity as behaviour interaction graphs, using spatio-temporal graph learning and anomaly detection on CERT data. Submitted to ICNDA 2026.</p>
-        <ul class="tags"><li>ST-GNN</li><li>EGAT</li><li>LSTM/GRU</li><li>Reinforcement learning</li><li>Explainable AI</li></ul>
+      <article class="project reveal">
+        <h3><button class="project-toggle" aria-expanded="false" aria-controls="demo-graph"><span class="ttl">Insider threat prediction</span><span class="pill"><i></i><span class="pill-text">Live demo</span></span></button></h3>
+        <p>Graph learning that models employee behaviour and flags anomalies in CERT data. Submitted to ICNDA 2026.</p>
+        <ul class="tags"><li>ST-GNN</li><li>LSTM/GRU</li><li>Explainable AI</li></ul>
+        <div class="demo-wrap" id="demo-graph"><div class="demo-inner"><canvas data-demo="graph" role="img" aria-label="Animation of a behaviour graph with one anomalous node being flagged"></canvas></div></div>
       </article>
-      <article class="project">
-        <h3>APISHIFT, Solana hackathon</h3>
-        <p>A blockchain-based way to simplify API integration and payments, taken from idea to working prototype in one day by a team of five. Third place at the Solana and Superteam Ireland hackathon.</p>
-        <ul class="tags"><li>Solana</li><li>Web3</li><li>JavaScript</li><li>TypeScript</li></ul>
+
+      <article class="project reveal">
+        <h3><button class="project-toggle" aria-expanded="false" aria-controls="demo-pay"><span class="ttl">APISHIFT</span><span class="pill"><i></i><span class="pill-text">Live demo</span></span></button></h3>
+        <p>Blockchain-based API payments, built in one day. 3rd place at the Solana and Superteam Ireland hackathon.</p>
+        <ul class="tags"><li>Solana</li><li>Web3</li><li>TypeScript</li></ul>
+        <div class="demo-wrap" id="demo-pay"><div class="demo-inner"><canvas data-demo="pay" role="img" aria-label="Animation of a payment moving from an app through APISHIFT to Solana"></canvas></div></div>
       </article>
-      <article class="project">
-        <h3>AI-powered legal assistant</h3>
-        <p>An NLP assistant that extracts relevant information from legal documents and answers questions in natural language, cutting the effort of searching and interpreting them.</p>
-        <ul class="tags"><li>Python</li><li>NLP</li><li>LLMs</li></ul>
+
+      <article class="project reveal">
+        <h3><button class="project-toggle" aria-expanded="false" aria-controls="demo-doc"><span class="ttl">Legal assistant</span><span class="pill"><i></i><span class="pill-text">Live demo</span></span></button></h3>
+        <p>NLP assistant that finds the relevant parts of legal documents and answers in plain language.</p>
+        <ul class="tags"><li>NLP</li><li>LLMs</li><li>Python</li></ul>
+        <div class="demo-wrap" id="demo-doc"><div class="demo-inner"><canvas data-demo="doc" role="img" aria-label="Animation of a scan highlighting key clauses in a document"></canvas></div></div>
       </article>
     </div>
 
@@ -144,26 +120,23 @@
 
 <section id="experience" class="section section-alt">
   <div class="wrap narrow">
-    <h2 class="section-title">Experience</h2>
+    <h2 class="section-title reveal">Experience</h2>
     <ol class="timeline">
-      <li>
+      <li class="reveal">
         <p class="when">Jan 2026 to Jun 2026</p>
         <h3>AI/ML Engineer Intern</h3>
         <p class="where">Mirador AI Technologies</p>
         <ul>
-          <li>Architected and deployed a production Kafka streaming server ingesting data across 9 concurrent analytics pipelines for live client systems.</li>
-          <li>Built real-time face recognition (YOLO, ByteTrack, InsightFace, FAISS) and fall detection (YOLO with an LSTM classifier), covering annotation, integration, preprocessing and deployment.</li>
-          <li>Debugged production pipelines end to end, fixing embedding mismatches, tracking drift and stale state.</li>
-          <li>Worked with clients to turn business requirements into technical specifications, and compared models on accuracy, latency and scalability.</li>
+          <li>Deployed a production Kafka server ingesting data for 9 concurrent analytics pipelines.</li>
+          <li>Built face recognition and fall detection systems for live client projects.</li>
         </ul>
       </li>
-      <li>
+      <li class="reveal">
         <p class="when">Jun 2025 to Jul 2025</p>
         <h3>Data Analyst Intern, NLP</h3>
         <p class="where">Metricbees Pvt Ltd</p>
         <ul>
-          <li>Developed an NLP chatbot that surfaces real-time doctor availability by location, using intent classification on unstructured text.</li>
-          <li>Improved response accuracy through text preprocessing, intent refinement and regression testing.</li>
+          <li>Built an NLP chatbot that shows real-time doctor availability by location.</li>
         </ul>
       </li>
     </ol>
@@ -172,37 +145,31 @@
 
 <section id="education" class="section">
   <div class="wrap narrow">
-    <h2 class="section-title">Education</h2>
+    <h2 class="section-title reveal">Education</h2>
     <ul class="edu">
-      <li>
-        <h3>MSc Computing (Artificial Intelligence)</h3>
-        <p>Dublin City University, Dublin. 2026 to present</p>
-      </li>
-      <li>
-        <h3>B.Tech, Artificial Intelligence and Data Science</h3>
-        <p>B.S.A. Crescent Institute of Science and Technology. 2022 to 2026. CGPA 8.62 / 10</p>
-      </li>
-      <li>
-        <h3>Higher Secondary Certificate, Computer Science</h3>
-        <p>NSN Memorial School. 2022. 75%</p>
-      </li>
+      <li class="reveal"><div><h3>MSc Computing (Artificial Intelligence)</h3><p>Dublin City University</p></div><span>2026 to present</span></li>
+      <li class="reveal"><div><h3>B.Tech, AI and Data Science</h3><p>B.S.A. Crescent Institute, CGPA 8.62</p></div><span>2022 to 2026</span></li>
     </ul>
-    <h3 class="sub">Certifications</h3>
-    <ul class="certs">
+    <ul class="certs reveal">
       <li>Power BI for Data Analytics, Vodafone</li>
       <li>Generative AI, GUVI</li>
-      <li>C Programming, IIT Bombay Spoken Tutorial</li>
+      <li>C Programming, IIT Bombay</li>
       <li>E-Business, NPTEL</li>
     </ul>
   </div>
 </section>
 
-<section id="contact" class="section contact">
+<section id="contact" class="section section-alt">
   <div class="wrap narrow">
-    <h2 class="section-title">Contact</h2>
-    <p>I'm looking for data analyst, data engineering and applied AI roles. Email is the quickest way to reach me.</p>
-    <p><a class="btn" href="mailto:sanjanaravi2311@gmail.com">Email me</a></p>
-    <ul class="contact-links">
+    <h2 class="section-title reveal">Contact</h2>
+    <p class="reveal">Open to AI engineering, data engineering and data analyst roles.</p>
+    <p class="reveal"><a class="btn" id="emailBtn" href="mailto:sanjanaravi2311@gmail.com">Email me</a></p>
+    <div class="email-reveal" id="emailReveal" hidden>
+      <span class="email-addr">sanjanaravi2311@gmail.com</span>
+      <button type="button" class="btn btn-ghost btn-small" id="copyBtn">Copy</button>
+      <a class="btn btn-ghost btn-small" href="https://mail.google.com/mail/?view=cm&amp;to=sanjanaravi2311@gmail.com" target="_blank" rel="noopener noreferrer">Open Gmail</a>
+    </div>
+    <ul class="contact-links reveal">
       <li>Dublin, Ireland</li>
       <li><a href="https://www.linkedin.com/in/sanjana-r-g-14980927b" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
       <li><a href="https://github.com/SanjanaRG2311" target="_blank" rel="noopener noreferrer">GitHub</a></li>
@@ -213,7 +180,7 @@
 
 <footer class="footer">
   <div class="wrap">
-    <p>&copy; <span id="current-year"></span> Sanjana R.G</p>
+    <p>&copy; <span id="current-year"></span> Sanjana Ravi Geetha</p>
   </div>
 </footer>
 
